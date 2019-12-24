@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--<meta charset="utf-8">
+<title>RAID容量计算器</title>-->
+<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Raid容量计算器</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<body >
+<h1>RAID容量计算器</h1>
+Raid类型：
+    <select id="aa">
+	<option value="R0">RAID 0(条形集)</option>
+    <option value="raid1">RAID 1(带条带的镜像)</option>
+	<option value="R5">RAID 5(带奇偶校验的条形设置)</option>
+    <option value="R6">RAID 6(带双奇偶的条形设置)</option>
+	<option value="R10">RAID 10(条纹镜)</option>
+	</select>
+<br/>
+驱动容量(GB):
+	<input id="qdrl" value="500" type="text" maxlength="12" size="15">
+<br/>
+单驱动性能：
+    <input id="dqxn" value="170" type="text" maxlength="12" size="15">
+                <input  type="radio" id="io" name="raidperfunit" value="IO/s" >IO/s
+                <input  type="radio" id="mb" name="raidperfunit" value="MB/s" checked="checked">MB/s
+<br/>
+单驱成本：
+	<input id="dqcb" value="75" type="text" maxlength="12" size="15">
+<br/>
+每个RAID组的驱动器数：
+	<input style="margin-top:0.5em" id="qdqs" value="2" type="text" maxlength="3" size="15">
+<br/>
+RAID组数：
+	<input style="margin-top:0.5em" id="raid_zs" name="zs"  value="3" type="text" maxlength="4" size="15">
+<br/>
+读操作(%)：
+    <input style="margin-top:0.5em" id="read" name="zs"  value="50" type="text" maxlength="4" size="15">
+<br/>
+	<button type="button" class="btn btn-success btn-lg btn_clear"  onclick=getdataa()>计算</button>
+<br/>
+
+<table>
+<tbody>
+  <tr>
+    <td><b>结果：</b></td>
+    <td>计算性能</td>
+  </tr>
+  <tr>
+      <td><b>总性能：</b></td>
+    <td id="raid_zxn">340</td>
+  </tr>
+  <tr>
+    <td><b>总可用储存容量(TB)：</b>
+    </td><td id="all"></td>
+  </tr>
+  <tr>
+    <td>RAID类型：</td>
+    <td id="lx">RAID 0(条形集)</td>
+  </tr>
+  <tr>
+    <td>RAID组数：</td>
+    <td id="zs">1</td>
+  </tr>
+  <tr>
+    <td>每个RAID组的驱动器数：</td>
+    <td id="raid_qdqs">2</td>
+  </tr>
+  <tr>
+    <td><b>驱动器总数：</b></td>
+    <td id="raid_qdzs"><b>2</b></td>
+  </tr>
+  <tr>
+    <td>驱动器容量(GB)：</td>
+    <td id="raid_qdrl">500</td>
+  </tr>
+  <tr>
+    <td>单个RAID组(GB)的容量：</td>
+    <td id="raid_rl">1000</td>
+  </tr>
+  <tr>
+    <td><b>空间效率：</b></td>
+    <td id="kjxl"><b>1</b>&nbsp;(100%)</td>
+  </tr>
+  <tr>
+    <td>容错<br>(每个RAID组的磁盘驱动器)：</td>
+    <td id="rc">0个磁盘驱动器(无)</td>
+  </tr>
+  <tr>
+    <td>IO处罚(读)：</td>
+    <td id="cf_read">1/1(每个主机IO一个RAID IO)</td>
+  </tr>
+  <tr>
+    <td>IO处罚(书面)：</td>
+    <td id="cf_write">1/1(每个主机IO一个RAID IO)</td>
+  </tr>
+  <tr>
+    <td>每个RAID 0组的最小驱动器数：</td>
+    <td id="min_qds">1</td>
+  </tr>
+  <tr>
+    <td>单驱成本：</td>
+    <td id="raid_dqcb">75</td>
+  </tr>
+
+  <tr>
+    <td><b>每TB可用成本</b>:</td>
+    <td id="cb_tb"><b></b></td>
+  </tr>
+  <tr>
+    <td><b>总费用：</b></td>
+    <td id="all_cost"><b></b></td>
+  </tr>
+</tbody>
+</table>
+
+
+
+  <script>
+      function getdataa(){
+        var slt=document.getElementById("aa");
+        var x_qdrl = document.getElementById("qdrl").value;
+		 var x_dqcb = document.getElementById("dqcb").value;
+		 var x_qdqs = document.getElementById("qdqs").value;
+		 var x_zs = document.getElementById("raid_zs").value;
+		 var x_dqxn = document.getElementById("dqxn").value;
+		 var x_read = document.getElementById("read").value;
+		 var y_all  =  document.getElementById("all");
+		 var y_zs = document.getElementById("zs");
+		 var y_qdqs = document.getElementById("raid_qdqs");
+		 var y_qdzs = document.getElementById("raid_qdzs");
+		 var y_qdrl = document.getElementById("raid_qdrl");
+		 var y_rl   = document.getElementById("raid_rl");
+		 var y_kjxl = document.getElementById("kjxl");
+		 var y_rc   = document.getElementById("rc");
+		 var y_cf_read = document.getElementById("cf_read");
+		 var y_cf_write= document.getElementById("cf_write");
+		 var y_min_qds = document.getElementById("min_qds");
+		 var y_raid_dqcb=document.getElementById("raid_dqcb");
+		 var y_cb_tb = document.getElementById("cb_tb");
+		 var y_all_cost = document.getElementById("all_cost");
+		 var y_lx = document.getElementById("lx");
+		 var y_raid_qdqs = document.getElementById("raid_qdqs");
+		 var y_raid_zxn = document.getElementById("raid_zxn");
+          if(slt.value=="R0"){
+            y_all.innerHTML=(Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/1000;
+            y_zs.innerHTML = x_zs;
+            y_qdqs.innerHTML= x_qdqs;
+            y_qdzs.innerHTML = Number(x_qdqs)*Number(x_zs);
+            y_qdrl.innerHTML = x_qdrl;
+            y_rl.innerHTML = (Number(x_qdrl)*(Number(x_qdqs)));
+            y_cb_tb.innerHTML = (1000/((Number(x_qdrl)))*Number(x_dqcb));
+            y_all_cost.innerHTML = ((Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/1000)*((1000/((Number(x_qdrl)))*Number(x_dqcb)));
+            y_lx.innerHTML = "Raid 0";
+            y_kjxl.innerHTML = "1 (100%)";
+            y_rc.innerHTML = "0个磁盘驱动器(无)";
+            y_cf_read.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_cf_write.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_min_qds.innerHTML = x_qdqs;
+            y_raid_dqcb.innerHTML = x_dqcb;
+            y_raid_qdqs.innerHTML = x_qdqs;
+            if(document.getElementById("io").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))+"  IO/s";
+            }
+            if(document.getElementById("mb").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))+"  MB/s";
+            }
+
+
+        }
+        if(slt.value=="raid1"){
+            y_all.innerHTML=(Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/2000;
+            y_zs.innerHTML = x_zs;
+            y_qdqs.innerHTML= x_qdqs;
+            y_qdzs.innerHTML = Number(x_qdqs)*Number(x_zs);
+            y_qdrl.innerHTML = x_qdrl;
+            y_rl.innerHTML = Number(x_qdrl)*(Number(x_qdqs)/2);
+            y_cb_tb.innerHTML = Number(x_dqcb)*2000/(Number(x_qdrl));
+            y_all_cost.innerHTML = ((Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/2000)*(Number(x_dqcb)*2000/(Number(x_qdrl)));
+            y_lx.innerHTML = "Raid 1";
+            y_kjxl.innerHTML = "0.5 (50%)";
+            y_rc.innerHTML = "每个RAID组一个磁盘驱动器";
+            y_cf_read.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_cf_write.innerHTML = "2/1(每个主机IO 4个RAID IOS)";
+            y_min_qds.innerHTML = x_qdqs;
+            y_raid_dqcb.innerHTML = x_dqcb;
+            y_raid_qdqs.innerHTML = x_qdqs;
+             if(document.getElementById("io").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+2*(1-(Number(x_read)/100)))+"  IO/s";
+            }
+            if(document.getElementById("mb").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+2*(1-(Number(x_read)/100)))+"  MB/s";
+            }
+        }
+
+        if(slt.value=="R5"){
+            y_all.innerHTML=(Number(x_qdrl)*(Number(x_qdqs)-1)*Number(x_zs))/1000;
+            y_zs.innerHTML = x_zs;
+            y_qdqs.innerHTML= x_qdqs;
+            y_qdzs.innerHTML = Number(x_qdqs)*Number(x_zs);
+            y_qdrl.innerHTML = x_qdrl;
+            y_rl.innerHTML = (Number(x_qdrl)*(Number(x_qdqs)-1));
+            y_cb_tb.innerHTML = (1000/((Number(x_qdqs)-1)*Number(x_qdrl))*Number(x_qdqs)*Number(x_dqcb));
+            y_all_cost.innerHTML = ((Number(x_qdrl)*(Number(x_qdqs)-1)*Number(x_zs))/1000)*(1000/((Number(x_qdqs)-1)*Number(x_qdrl))*Number(x_qdqs)*Number(x_dqcb));
+            y_lx.innerHTML = "Raid 5";
+            y_kjxl.innerHTML = (Number(x_qdqs)-1)/Number(x_qdqs);
+            y_rc.innerHTML = "每个RAID组一个磁盘驱动器";
+            y_cf_read.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_cf_write.innerHTML = "4/1(每个主机IO 4个RAID IOS)";
+            y_min_qds.innerHTML = x_qdqs;
+            y_raid_dqcb.innerHTML = x_dqcb;
+            y_raid_qdqs.innerHTML = x_qdqs;
+            if(document.getElementById("io").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+4*(1-(Number(x_read)/100)))+"  IO/s";
+            }
+            if(document.getElementById("mb").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+4*(1-(Number(x_read)/100)))+"  MB/s";
+            }
+
+        }
+        if(slt.value=="R6"){
+            y_all.innerHTML=(Number(x_qdrl)*(Number(x_qdqs)-2)*Number(x_zs))/1000;
+            y_zs.innerHTML = x_zs;
+            y_qdqs.innerHTML= x_qdqs;
+            y_qdzs.innerHTML = Number(x_qdqs)*Number(x_zs);
+            y_qdrl.innerHTML = x_qdrl;
+            y_rl.innerHTML = (Number(x_qdrl)*(Number(x_qdqs)-2));
+            y_cb_tb.innerHTML = (1000/((Number(x_qdqs)-2)*Number(x_qdrl))*Number(x_qdqs)*Number(x_dqcb));
+            y_all_cost.innerHTML = ((Number(x_qdrl)*(Number(x_qdqs)-2)*Number(x_zs))/1000)*(1000/((Number(x_qdqs)-2)*Number(x_qdrl))*Number(x_qdqs)*Number(x_dqcb));
+            y_lx.innerHTML = "Raid 6";
+            y_kjxl.innerHTML = (Number(x_qdqs)-2)/Number(x_qdqs);
+            y_rc.innerHTML = "每个RAID组2个磁盘驱动器";
+            y_cf_read.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_cf_write.innerHTML = "6/1(每个主机IO 4个RAID IOS)";
+            y_min_qds.innerHTML = x_qdqs;
+            y_raid_dqcb.innerHTML = x_dqcb;
+            y_raid_qdqs.innerHTML = x_qdqs;
+            if(document.getElementById("io").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+6*(1-(Number(x_read)/100)))+"  IO/s";
+            }
+            if(document.getElementById("mb").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+6*(1-(Number(x_read)/100)))+"  MB/s";
+            }
+        }
+        if(slt.value=="R10") {
+            y_all.innerHTML = (Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/2000;
+            y_zs.innerHTML = x_zs;
+            y_qdqs.innerHTML = x_qdqs;
+            y_qdzs.innerHTML = Number(x_qdqs) * Number(x_zs);
+            y_qdrl.innerHTML = x_qdrl;
+            y_rl.innerHTML = (Number(x_qdrl) * (Number(x_qdqs) )/2)
+            y_cb_tb.innerHTML = Number(x_dqcb)*2000/(Number(x_qdrl));
+            y_all_cost.innerHTML = ((Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/2000) * (Number(x_dqcb)*2000/(Number(x_qdrl)));
+            y_lx.innerHTML = "Raid 10";
+            y_kjxl.innerHTML = "0.5(50%)";
+            y_rc.innerHTML = "每个RAID 10组1(Min)至2(最大)磁盘驱动器";
+            y_cf_read.innerHTML = "1/1(每个主机IO一个RAID IO)";
+            y_cf_write.innerHTML = "2/1(每个主机IO 2个RAID IOS)";
+            y_min_qds.innerHTML = x_qdqs;
+            y_raid_dqcb.innerHTML = x_dqcb;
+            y_raid_qdqs.innerHTML = x_qdqs;
+            if(document.getElementById("io").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+2*(1-(Number(x_read)/100)))+"  IO/s";
+            }
+            if(document.getElementById("mb").checked==true){
+                y_raid_zxn.innerHTML = (Number(x_qdqs)*Number(x_zs)*Number(x_dqxn))/((Number(x_read)/100)+2*(1-(Number(x_read)/100)))+"  MB/s";
+            }
+        }
+      }
+
+
+   </script>
+
+</body>
+</html>
