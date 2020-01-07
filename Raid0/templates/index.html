@@ -169,13 +169,13 @@
 		 var y_raid_dgxn = document.getElementById("raid_dgxn");
           if(slt.value=="R0"){
               if(x_qdqs<2){
-                alert("错误，raid0至少需要两块硬盘")
+                alert("错误，raid0至少需要一块硬盘")
                 return false
             }
                 test_qdqs.onkeyup = function() {
                     //this.value = this.value.replace(/\D/g, '');
-                    if (test_qdqs.value != "" && test_qdqs.value< 2) {
-                        test_qdqs.value = 2;
+                    if (test_qdqs.value != "" && test_qdqs.value< 1) {
+                        test_qdqs.value = 1;
                     }
                 }
             y_all.innerHTML=kg+(Number(x_qdrl)*(Number(x_qdqs))*Number(x_zs))/1000;
